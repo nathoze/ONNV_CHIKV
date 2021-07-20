@@ -10,3 +10,4 @@ It was tested on a Windows computer with rstan version 2.19.2. To use rstan, Win
 The R scripts allow to load the data, plot the data (figure 1),
 run the MCMC algorithm, and display the parameter estimates.
  
+All the scripts can be run sequentially using the script main.R 
