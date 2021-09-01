@@ -24,7 +24,7 @@ functions{
     return(a);
   }
   
-  real PNIPI(real pC,real pN,
+  real likelihood_titer(real pC,real pN,
   int CHIKV, int  ONNV, int m, 
   real s1C, real s1N,
   real pCN, real pNC, real sCN, real sNC){
@@ -45,7 +45,6 @@ functions{
     
     V1=0; 
     
-    
     P00 =  (1-pC)*(1-pN);
     P10 =  pC*(1-pN);
     P01 =  (1-pC)*pN;
@@ -58,20 +57,24 @@ functions{
     if(ONNV==0){
       P1=1;
     }
+    # Probability not infected
     A =  P00*P0*P1;
     
-    
+    # Probability  infected by CHIKV and not by ONNV
     P2= dresponse(CHIKV, s1C);
     P5= dcrossreactivity(ONNV, CHIKV,  sCN);
-    
     A =  A+ P10*P2*(P5*pCN+P1*(1-pCN));
     
+    
+    # Probability  infected by ONNV and not by CHIKV
     P3 = dcrossreactivity(CHIKV, ONNV, sNC);
     P4= dresponse(ONNV, s1N);
-    
     A =  A+ P01*P4*(P3*pNC+P0*(1-pNC));
     
+    # Probability  infected by both ONNV and CHIKV
+    # 1 if there is no cross reactivity
     B=(1-pCN)*(1-pNC)*P2*P4;
+    # 2 if CHIKV induces a response in ONNV but not the opposite
     
     V1=0;
     for(k in 0:ONNV){
@@ -79,26 +82,26 @@ functions{
     }
     B=B + pCN*(1-pNC)*P2*V1;
     
+    # 3 if ONNV induces a response in CHIKV but not the opposite
     V1=0;
     for(k in 0:CHIKV){
       V1=V1+dresponse(k,s1C)*dcrossreactivity(CHIKV-k, ONNV,sNC) ;
     }
     B=B +(1-pCN)*pNC*P4*V1;
     
+    # 4 if both CHIKV and ONNV induce a cross-reactive response
     V1=0;
     for(kC in 0:CHIKV){
       for(kN in 0:ONNV){
         V1=V1+dresponse(kC, s1C)*dresponse(kN, s1N)*dcrossreactivity(CHIKV-kC, kN,  sNC)*dcrossreactivity(ONNV-kN, kC,  sCN);
       }
     }
-    
     B=B + pCN*pNC*V1;
+    
     A=A+B*P11;   
     
     return(A);
   }
-  
-  
   
 }
 
@@ -162,9 +165,7 @@ model {
   locN ~ normal(0,3);  
   pNC ~ uniform(0,1); 
   pCN ~ uniform(0,1); 
-  
-  
-  
+   
   
   for(i in 1:N){
     A = 0;
@@ -196,7 +197,7 @@ model {
       pN= 1-exp(-qN_Martinique); 
     }
     
-    A = PNIPI(pC,pN,
+    A = likelihood_titer(pC,pN,
     CHIKV, ONNV, m,
     s1C, s1N,
     pCN,pNC,sCN,sNC);
@@ -205,7 +206,7 @@ model {
       A=0;
       for(i1 in m:10){
         for(i2 in m:10){
-          A = A+ PNIPI(pC,pN, 
+          A = A+ likelihood_titer(pC,pN, 
           i1, i2,m,
           s1C, s1N,
           pCN,pNC,
@@ -216,7 +217,7 @@ model {
     if(CHIKV==m && ONNV<m){
       A=0;
       for(i1 in m:10){
-        A = A+ PNIPI(pC,pN, i1, ONNV,m,
+        A = A+ likelihood_titer(pC,pN, i1, ONNV,m,
         s1C, s1N,
         pCN,pNC,
         sCN,sNC);
@@ -225,7 +226,7 @@ model {
     if(CHIKV<m && ONNV==m){
       A=0;
       for(i2 in m:10){
-        A = A+ PNIPI(pC,pN, CHIKV, i2,m,
+        A = A+ likelihood_titer(pC,pN, CHIKV, i2,m,
         s1C, s1N,
         pCN,pNC,
         sCN,sNC);              
