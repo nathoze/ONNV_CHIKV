@@ -1,4 +1,4 @@
-# R scripts and data for “Assessing arbovirus circulation in a context of serological cross-reactivity: the case of Chikungunya and O’nyong-nyong viruses in Mali”
+# R scripts and data for “Model-based assessment of Chikungunya and O’nyong-nyong virus circulation in Mali in a serological cross-reactivity context”
 
 ## Data
 The following data is available in a format that maintains anonymity of survey participants. For each individual: age group (10-year classes), ONNV VNT, CHIKV VNT, region (North or South), sex.  
